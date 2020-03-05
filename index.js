@@ -3,7 +3,8 @@ require('dotenv').config();
 const Discord = require('discord.js')
 const client = new Discord.Client()
 
-
+let moment = require('moment');
+moment().format();
 
 const buffs = {
     ony : {
@@ -20,7 +21,7 @@ const buffs = {
     },
     nefarian : {
         display : "Dragon Slayer (Nefarian)",
-        cooldown : 480 
+        cooldown : 480
     },
     rend : {
         display : "War Chief's Blessing",
@@ -53,28 +54,56 @@ client.on('message', msg => {
             msg.reply('NOT A COMMAND IDIOT')
             msg.delete()
         } else {
-            msg.channel.send('what');
+            // split out parameters
             let command = msg.content.split(' ');
-            let buffType = command[1],
-                action = command[2],
-                time = command[3];
-            console.log(buffType);
-            console.log(action);
-            console.log(time);
+            command.splice(0,1);
+            let buffType = command.splice(0,1)[0];
+            let action = command.splice(0,1)[0];
+            let time = command.splice(0,1)[0];
+            let droppedBy = (command.length > 1) ? '- By: ' + command.join(" ") : '';
+            if (!buffs[buffType]) {
+                console.log('inavlid buff type'); 
+                msg.reply(buffType + "is not a valid buff name. Please see pins for proper use.");
+                msg.delete();
+                return;
+            }
 
-            response = `
-            \`\`\`py
-            Hello?
-            \`\`\`
-            `
-                
+            // a whole bunch of time BS
+            let newTime = moment();
+            newTime.set('hour',moment(time,"HH:mmA").hour());
+            newTime.set('minute',moment(time,"HH:mmA").minute());
+            newTime.add(buffs[buffType].cooldown,'minutes');
+
+
+            if (action.toLowerCase() == 'dropped') {
+                response = 
+                    `\`\`\`fix\n` + 
+                    `${buffs[buffType].display}\n` +
+                    `\`\`\`` +
+                    `\`\`\`asciidoc\n` +
+                    `Dropped ${time} Server Time ${droppedBy}\n` +
+                    `===================\n` +
+                    `[Next Available ${newTime.format('hh:mmA')} Server Time]\n` +
+                    `\n` +
+                    `Submitted by: ${msg.member.nickname}\n` +
+                    `\`\`\`\n`
+            } else if (action.toLowerCase() == 'planned'){
+                response = 
+                    `\`\`\`fix\n` + 
+                    `${buffs[buffType].display}` + 
+                    `\`\`\`` + 
+                    `\`\`\`asciidoc\n` + 
+                    `PLANNED for ${time} Server Time ${droppedBy}\n`+ 
+                    `====================\n`+ 
+                    `Submitted by: ${msg.member.nickname}\n`+ 
+                    `\`\`\`\n`
+            } else {
+                response = 'Invalid action. Must be "planned" or "dropped".'
+            }
+
             msg.channel.send(response);
-         
-            
+            // msg.delete()
         }
-        // msg.channel.send('testststststs');
-        // msg.channel.send('ahhhhh');
-        // !wb [ony|onyxia|nef|nefarian|wcb|rend|dragonslayer] [action] [time]
     }
 })
 
