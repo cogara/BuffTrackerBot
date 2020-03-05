@@ -27,22 +27,30 @@ const buffs = {
         display : "War Chief's Blessing",
         cooldown : 180
     },
-    WCB : {
+    wcb : {
         display : "War Chief's Blessing",
         cooldown : 180 
     },
-    BVSF : {
-        display : 'BVFP Songflower',
+    sf : {
+        display : 'Songflower',
         cooldown: 25
+    },
+    songflower : {
+        display : 'Songflower',
+        cooldown: 25
+    },
+    zandalar : {
+        display : 'Spirit of Zandalar',
+        cooldown: 120
     }
 }
 
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`)
-  const allyBuffChannel = client.channels.cache.find(ch => ch.name === 'ally-buffs').id
-  const hordeBuffChannel = client.channels.cache.find(ch => ch.name === 'horde-buffs').id
-  console.log('Ally: ' + allyBuffChannel);
-  console.log('Horde: ' + hordeBuffChannel);
+//   const allyBuffChannel = client.channels.cache.find(ch => ch.name === 'ally-buffs').id
+//   const hordeBuffChannel = client.channels.cache.find(ch => ch.name === 'horde-buffs').id
+//   console.log('Ally: ' + allyBuffChannel);
+//   console.log('Horde: ' + hordeBuffChannel);
   
 })
 
@@ -50,35 +58,34 @@ client.on('message', msg => {
     if  (!msg.author.bot) {
         console.log(msg.content);
         
-        if (!msg.content.startsWith('!wb')) {
-            msg.reply('NOT A COMMAND IDIOT')
-            msg.delete()
-        } else {
+        if (msg.content.startsWith('!wb')) {
+
+            // msg.delete()
             // split out parameters
             let command = msg.content.split(' ');
             command.splice(0,1);
             let buffType = command.splice(0,1)[0];
             let action = command.splice(0,1)[0];
             let time = command.splice(0,1)[0];
-            let droppedBy = (command.length > 1) ? '- By: ' + command.join(" ") : '';
-            if (!buffs[buffType]) {
+            let droppedBy = (command.length > 0) ? '- By: ' + command.join(" ") : '';
+            if (!buffs[buffType.toLowerCase()]) {
                 console.log('inavlid buff type'); 
                 msg.reply(buffType + "is not a valid buff name. Please see pins for proper use.");
                 msg.delete();
                 return;
             }
-
+            console.log(droppedBy);
             // a whole bunch of time BS
             let newTime = moment();
             newTime.set('hour',moment(time,"HH:mmA").hour());
             newTime.set('minute',moment(time,"HH:mmA").minute());
-            newTime.add(buffs[buffType].cooldown,'minutes');
+            newTime.add(buffs[buffType.toLowerCase()].cooldown,'minutes');
 
 
             if (action.toLowerCase() == 'dropped') {
                 response = 
                     `\`\`\`fix\n` + 
-                    `${buffs[buffType].display}\n` +
+                    `${buffs[buffType.toLowerCase()].display}\n` +
                     `\`\`\`` +
                     `\`\`\`asciidoc\n` +
                     `Dropped ${time} Server Time ${droppedBy}\n` +
@@ -90,7 +97,7 @@ client.on('message', msg => {
             } else if (action.toLowerCase() == 'planned'){
                 response = 
                     `\`\`\`fix\n` + 
-                    `${buffs[buffType].display}` + 
+                    `${buffs[buffType.toLowerCase()].display}` + 
                     `\`\`\`` + 
                     `\`\`\`asciidoc\n` + 
                     `PLANNED for ${time} Server Time ${droppedBy}\n`+ 
@@ -103,6 +110,32 @@ client.on('message', msg => {
 
             msg.channel.send(response);
             // msg.delete()
+        } else if (msg.content.startsWith('!sf')) {
+            
+            let command = msg.content.split(' ');
+            command.splice(0,1);
+            let location = command.splice(0,1)[0];
+            let time = command.splice(0,1)[0];
+            let newTime = moment();
+            newTime.set('hour',moment(time,"HH:mmA").hour());
+            newTime.set('minute',moment(time,"HH:mmA").minute());
+            newTime.add(buffs['songflower'].cooldown,'minutes');
+
+            response = 
+                `\`\`\`fix\n` + 
+                `Songflower - ${location}\n` +
+                // `${buffs[buffType.toLowerCase()].display}\n` +
+                `\`\`\`` +
+                `\`\`\`asciidoc\n` +
+                `Dropped ${time} Server Time\n` +
+                `===================\n` +
+                `[Next Available ${newTime.format('hh:mmA')} Server Time]\n` +
+                `\n` +
+                `Submitted by: ${msg.member.nickname} - ${msg.author.username}\n` +
+                `\`\`\`\n`
+
+            msg.channel.send(response);
+            
         }
     }
 })
