@@ -57,86 +57,151 @@ client.on('ready', () => {
 client.on('message', msg => {
     if  (!msg.author.bot) {
         console.log(msg.content);
-        
-        if (msg.content.startsWith('!wb')) {
+        let sendTimer = true;
+        let submittedBy, response = "";
+        let message = msg.content.split(' ');
+        let command = message.splice(0,1)[0].toLowerCase();
+        let actionOrLoc = message.splice(0,1)[0]; 
+        let time = message.splice(0,1)[0]; 
+        let droppedBy = (message.length > 0) ? '- By: ' + message.join(" ") : '';
 
-            // msg.delete()
-            // split out parameters
-            let command = msg.content.split(' ');
-            command.splice(0,1);
-            let buffType = command.splice(0,1)[0];
-            let action = command.splice(0,1)[0];
-            let time = command.splice(0,1)[0];
-            let droppedBy = (command.length > 0) ? '- By: ' + command.join(" ") : '';
-            if (!buffs[buffType.toLowerCase()]) {
-                console.log('inavlid buff type'); 
-                msg.reply(buffType + "is not a valid buff name. Please see pins for proper use.");
-                msg.delete();
-                return;
-            }
-            console.log(droppedBy);
-            // a whole bunch of time BS
-            let newTime = moment();
-            newTime.set('hour',moment(time,"HH:mmA").hour());
-            newTime.set('minute',moment(time,"HH:mmA").minute());
-            newTime.add(buffs[buffType.toLowerCase()].cooldown,'minutes');
+        // a whole bunch of time BS
+        let newTime = moment();
+        newTime.set('hour',moment(time,"HH:mmA").hour());
+        newTime.set('minute',moment(time,"HH:mmA").minute());
 
-
-            if (action.toLowerCase() == 'dropped') {
+        switch(command) {
+            case '!ony':
+            case '!onyxia':
+                newTime.add(buffs['ony'].cooldown,'minutes');
                 response = 
                     `\`\`\`fix\n` + 
-                    `${buffs[buffType.toLowerCase()].display}\n` +
-                    `\`\`\`` +
+                    `${buffs['ony'].display}\n` +
+                    `\`\`\``;
+                if (actionOrLoc.toLowerCase() == 'dropped') {
+                    response += 
+                        `\`\`\`asciidoc\n` +
+                        `Dropped ${time} Server Time ${droppedBy}\n` + 
+                        `===================\n` +
+                        `[Next Available ${newTime.format('hh:mmA')} Server Time]\n` +
+                        '';
+                } else if (actionOrLoc.toLowerCase() == 'planned') {
+                    response += 
+                        `\`\`\`asciidoc\n` + 
+                        `[PLANNED for ${time} Server Time ${droppedBy}]\n`;
+                } else {
+                    sendTimer = false;
+                    msg.channel.send('Improper action - use !help for more info');
+                    msg.delete();
+                }
+                break;
+            case '!nef':
+            case '!nefarian':
+                newTime.add(buffs['nef'].cooldown,'minutes');
+                response = 
+                    `\`\`\`fix\n` + 
+                    `${buffs['nef'].display}\n` +
+                    `\`\`\``;
+                    if (actionOrLoc.toLowerCase() == 'dropped') {
+                        response += 
+                            `\`\`\`asciidoc\n` +
+                            `Dropped ${time} Server Time ${droppedBy}\n` +
+                            `===================\n` +
+                            `[Next Available ${newTime.format('hh:mmA')} Server Time]\n` +
+                            '';
+                    } else if (actionOrLoc.toLowerCase() == 'planned') {
+                        response +=
+                            `\`\`\`asciidoc\n` + 
+                            `[PLANNED for ${time} Server Time ${droppedBy}]\n`;
+                    } else {
+                        sendTimer = false;
+                        msg.channel.send('Improper action - use !help for more info');
+                        msg.delete();
+                    }
+                break;
+            case '!wcb':
+            case '!rend':
+                newTime.add(buffs['wcb'].cooldown,'minutes');
+                response = 
+                    `\`\`\`fix\n` + 
+                    `${buffs['wcb'].display}\n` +
+                    `\`\`\``;
+                    if (actionOrLoc.toLowerCase() == 'dropped') {
+                        response += 
+                            `\`\`\`asciidoc\n` +
+                            `Dropped ${time} Server Time ${droppedBy}\n` +
+                            `===================\n` +
+                            `[Next Available ${newTime.format('hh:mmA')} Server Time]\n` +
+                            '';
+                    } else if (actionOrLoc.toLowerCase() == 'planned') {
+                        response += 
+                            `\`\`\`asciidoc\n` + 
+                            `[PLANNED for ${time} Server Time ${droppedBy}]\n`;
+                    } else {
+                        sendTimer = false;
+                        msg.channel.send('Improper action - use !help for more info');
+                        msg.delete();
+                    }
+                break;
+            case '!sf':
+            case '!songflower':
+                newTime.add(buffs['sf'].cooldown,'minutes');
+                if (!moment(time,['hh:mm','hh:mmA'],true).isValid()) {
+                    msg.reply('Time must be 3rd parameter. See !help for more information');
+                    msg.delete();
+                    return;
+                }
+                response = 
+                    `\`\`\`fix\n` + 
+                    `Songflower - ${actionOrLoc}\n` +
+                    `\`\`\`` + 
                     `\`\`\`asciidoc\n` +
-                    `Dropped ${time} Server Time ${droppedBy}\n` +
+                    `Picked ${time} Server Time\n` +
                     `===================\n` +
                     `[Next Available ${newTime.format('hh:mmA')} Server Time]\n` +
-                    `\n` +
-                    `Submitted by: ${msg.member.nickname}\n` +
-                    `\`\`\`\n`
-            } else if (action.toLowerCase() == 'planned'){
+                    ``;
+
+                    break;
+            case '!help': 
                 response = 
-                    `\`\`\`fix\n` + 
-                    `${buffs[buffType.toLowerCase()].display}` + 
-                    `\`\`\`` + 
-                    `\`\`\`asciidoc\n` + 
-                    `PLANNED for ${time} Server Time ${droppedBy}\n`+ 
-                    `====================\n`+ 
-                    `Submitted by: ${msg.member.nickname}\n`+ 
-                    `\`\`\`\n`
-            } else {
-                response = 'Invalid action. Must be "planned" or "dropped".'
-            }
-
-            msg.channel.send(response);
-            // msg.delete()
-        } else if (msg.content.startsWith('!sf')) {
-            
-            let command = msg.content.split(' ');
-            command.splice(0,1);
-            let location = command.splice(0,1)[0];
-            let time = command.splice(0,1)[0];
-            let newTime = moment();
-            newTime.set('hour',moment(time,"HH:mmA").hour());
-            newTime.set('minute',moment(time,"HH:mmA").minute());
-            newTime.add(buffs['songflower'].cooldown,'minutes');
-
-            response = 
-                `\`\`\`fix\n` + 
-                `Songflower - ${location}\n` +
-                // `${buffs[buffType.toLowerCase()].display}\n` +
-                `\`\`\`` +
-                `\`\`\`asciidoc\n` +
-                `Dropped ${time} Server Time\n` +
-                `===================\n` +
-                `[Next Available ${newTime.format('hh:mmA')} Server Time]\n` +
-                `\n` +
-                `Submitted by: ${msg.member.nickname} - ${msg.author.username}\n` +
-                `\`\`\`\n`
-
-            msg.channel.send(response);
-            
+                    `\`\`\`` +
+                    `To log a buff time - please follow the below format:\n` +
+                    `![ony|onyxia|nef|nefarian|wcb|rend|sf|songflower] [planned|dropped|location] [time] [player]\n\n` +
+                    `Examples for shared buffs:\n` + 
+                    `!ony dropped 10:30pm\n` +
+                    `!nef planned 9:44am <guild> player\n` +
+                    `The player is optional, and if provided, will say who a buff was dropped by or is planned by.\n\n` +
+                    `Examples for songflower:\n` + 
+                    `!sf BVFP 3:28pm\n\n` +
+                    `For songflowers, the second argument is the location, and must not include any spaces. Use generally accepted acronyms or short names.` +
+                    `\`\`\``;
+                    msg.channel.send(response);
+                    msg.delete();
+                    sendTimer = false;
+                    // return;
+                    break;
+            default:
+                sendTimer = false;
+                msg.channel.send(`"${msg.content}" is not a valid command - use !help for more info`);
+                if (!msg.member.roles.cache.some(role =>['Nodel','Admin','[A] Moderator','[H] Moderator'].includes(role.name))) {
+                    msg.delete();
+                }
+                break; 
         }
+
+        
+        submittedBy = 
+            `\n` +
+            `Submitted by: ${(msg.member.nickname) ? msg.member.nickname + '-' : ''} ${msg.author.username}\n` +
+            `\`\`\`\n`;
+
+        // console.log((msg.member.roles.cache.some(role =>['tell me false'].includes(role.name))));
+        
+        if (sendTimer) {
+            msg.channel.send(response + submittedBy);
+            msg.delete();
+        }
+
     }
 })
 
