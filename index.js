@@ -146,7 +146,7 @@ client.on('message', msg => {
             case '!sf':
             case '!songflower':
                 newTime.add(buffs['sf'].cooldown,'minutes');
-                if (!moment(time,['hh:mm','hh:mmA'],true).isValid()) {
+                if (!moment(time,['hh:mm','h:mm','hh:mmA','h:mmA'],true).isValid()) {
                     msg.reply('Time must be 3rd parameter. See !help for more information');
                     msg.delete();
                     return;
