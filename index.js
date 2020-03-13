@@ -152,8 +152,8 @@ client.on('message', msg => {
                     return;
                 }
                 response = 
-                    `\`\`\`fix\n` + 
-                    `Songflower - ${actionOrLoc}\n` +
+                    `\`\`\`diff\n` + 
+                    `+ Songflower - ${actionOrLoc} +\n` +
                     `\`\`\`` + 
                     `\`\`\`asciidoc\n` +
                     `Picked ${time} Server Time\n` +
